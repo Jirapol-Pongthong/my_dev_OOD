@@ -1,88 +1,121 @@
 class Node:
-        def __init__(self, value,next = None):
-            self.value = value
-            if next == None:
-                self.next = None
-            else:
-                self.next = next
-
+    def __init__(self, val, nxt=None):
+        self.val = val
+        self.next = nxt
 
 class LinkedList:
-        
     def __init__(self):
         self.head = None
-        self.tail = self.head
-        self.size = 0
-    
-    def append(self,data):
-        p = Node(data)
-        if self.head == None :
-            self.head = p
-            self.size += 1
+        self.tail = None
+    def append(self, v):
+        n = Node(v)
+        if not self.head:
+            self.head = self.tail = n
         else:
+            self.tail.next = n
+            self.tail = n
+    def get_root(self):
+        n = self.head
+        while n and n.next:
+            n = n.next
+        return n.val if n else None
 
-            t = self.head
-            while t.next is not None:
-                t = t.next
-            t.next = p
-            self.tail = p
-            self.size += 1
+class BranchNode:
+    def __init__(self, branch):
+        self.branch = branch
+        self.next = None
 
+def find_commit_info(head, val):
+    n = head
+    while n:
+        if n.val == val:
+            return n
+        n = n.next
+    return None
 
-    def search(self, item):
-        t = self.head
-        while t != None:
-            if t.value == item :
-                return "Found"
-            t=t.next
-        return "Not Found"
-    
-    def index(self, item):
-        t = self.head
-        idx = 0
-        while t is not None:
-            if t.value == item:
-                return idx
-            t = t.next
-            idx += 1
-        return -1
-    
-    def __str__(self):
-        ans = []
-        node = self.head
-        while node:
-            ans.append(str(node.value))
-            node = node.next
-        return '->'.join(ans)
+def all_same(head):
+    if not head:
+        return True
+    v = head.val
+    n = head.next
+    while n:
+        if n.val != v:
+            return False
+        n = n.next
+    return True
 
+def collect_commits(branch_head):
+    head = None
+    b = branch_head
+    while b:
+        n = b.branch.head
+        while n:
+            ci = find_commit_info(head, n.val)
+            if not ci:
+                ci = Node(n.val)
+                ci.next = head
+                head = ci
+                ci.locations = None
+            loc = Node((b, n))
+            loc.next = ci.locations
+            ci.locations = loc
+            n = n.next
+        b = b.next
+    return head
 
+def count_merges(branch_head):
+    if not branch_head:
+        return 0
+    root = branch_head.branch.get_root()
+    ci = collect_commits(branch_head)
+    merges = 0
+    while ci:
+        if ci.val != root:
+            # นับ branch ที่มี commit นี้
+            cnt = 0
+            loc = ci.locations
+            nexts = None
+            while loc:
+                cnt += 1
+                nxt_val = loc.val[1].next.val if loc.val[1].next else None
+                n = Node(nxt_val, nexts)
+                nexts = n
+                loc = loc.next
+            if cnt > 1 and not all_same(nexts):
+                merges += 1
+        ci = ci.next
+    return merges
+
+def check_same_repo(branch_head):
+    if not branch_head:
+        return True
+    root = branch_head.branch.get_root()
+    b = branch_head
+    while b:
+        if b.branch.get_root() != root:
+            return False
+        b = b.next
+    return True
+
+# อ่าน input
 inp = input("Git History: ")
-branch_strings = inp.split("|")
+branches = inp.split("|")
 branch_head = None
-last_branch = None
-
-for branch_str in branch_strings:
-    branch_str = branch_str.strip()
-    commits = [c.strip() for c in branch_str.split("->") if c.strip()]  # ใช้ list แค่ตรงนี้
-    commit_ll = LinkedList()
-
-    for commit_id in commits:
-        commit_ll.append(commit_id)
-
-    # สร้าง node ของ branch
-    branch_node = Node(commit_ll)
-    if branch_head is None:
-        branch_head = branch_node
+last = None
+for br in branches:
+    br = br.strip()
+    commits = [c.strip() for c in br.split("->")]
+    ll = LinkedList()
+    for c in commits:
+        ll.append(c)
+    bn = BranchNode(ll)
+    if not branch_head:
+        branch_head = bn
     else:
-        last_branch.next = branch_node
-    last_branch = branch_node
+        last.next = bn
+    last = bn
 
-
-b = branch_head
-count = 1
-while b:
-    print(f"Branch {count}: {b.branch}")
-    b = b.next
-    count += 1
-
-
+same_repo = check_same_repo(branch_head)
+print(f"Are these branches in the same repository? {same_repo}")
+if same_repo:
+    print(f"{count_merges(branch_head)} Merge(s)")
