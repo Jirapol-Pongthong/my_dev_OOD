@@ -54,3 +54,35 @@ class LinkedList:
             ans.append(str(node.value))
             node = node.next
         return '->'.join(ans)
+
+
+inp = input("Git History: ")
+branch_strings = inp.split("|")
+branch_head = None
+last_branch = None
+
+for branch_str in branch_strings:
+    branch_str = branch_str.strip()
+    commits = [c.strip() for c in branch_str.split("->") if c.strip()]  # ใช้ list แค่ตรงนี้
+    commit_ll = LinkedList()
+
+    for commit_id in commits:
+        commit_ll.append(commit_id)
+
+    # สร้าง node ของ branch
+    branch_node = Node(commit_ll)
+    if branch_head is None:
+        branch_head = branch_node
+    else:
+        last_branch.next = branch_node
+    last_branch = branch_node
+
+
+b = branch_head
+count = 1
+while b:
+    print(f"Branch {count}: {b.branch}")
+    b = b.next
+    count += 1
+
+

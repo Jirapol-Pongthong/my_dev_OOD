@@ -63,16 +63,16 @@ class LinkedList:
         return -1
 
     def size(self):
+        if self.head == None:
+            return 0
         return self.item
 
     def pop(self, pos):
-        try:
-            pos = int(i[3:])
-        except:
-            print("Invalid position")
         if self.isEmpty():
             return "Out of Range"
-        if pos < 0 :
+        
+        # ตำแหน่งติดลบ หรือเกินขนาดลิสต์
+        if pos < 0 or pos >= self.item:
             return "Out of Range"
         t = self.head
         idx = 0
