@@ -1,4 +1,3 @@
-
 class Node:
         def __init__(self, key):
             self.left = None
@@ -71,15 +70,15 @@ class BST:
         for i in result:
             sum += i
         return sum
-    def pid_Order(self):
+    def preOrder(self):
         result = []
-        self._pid_Order(self.root,result)
+        self._preOrder(self.root,result)
         return result
-    def _pid_Order(self,root,result):
+    def _preOrder(self,root,result):
         if root is not None:
             result.append(root.val)
-            self._pid_Order(root.right,result)
-            self._pid_Order(root.left,result)
+            self._preOrder(root.right,result)
+            self._preOrder(root.left,result)
 
 
     def __str__(self):
@@ -91,19 +90,13 @@ class BST:
         result += "     " * level + f" {node.val}\n"
         result += self._print_tree(node.left, level + 1)
         return result
-inp = input("**Sum of tree**\nEnter input : ")
-inp = inp.split("/")
-inp[1]= int(inp[1])
-inp[0] = inp[0].split()
-inp[0] = [int(i) for i in inp[0]]
-t=BST()
-rist = []
-for i in inp[0]:
-    if i not in rist:
-        rist.append(i)
-for i in rist:
-    t.insert(i)
 
-print(f"\nTree before:\n{t}Sum of all nodes = {t.BFS()}")
-t.convert_tree(inp[1])
-print(f"\nTree after:\n{t}Sum of all nodes = {t.BFS()}")
+
+inp = input("Enter Input : ")
+inp = inp.split()
+T = BST()
+for i in inp:
+    T.insert(i)
+
+print(T.preOrder())
+print(T)
